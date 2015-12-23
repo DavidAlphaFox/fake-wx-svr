@@ -1,0 +1,2 @@
+database:
+  database: fc-web-game-server_test.sqlite3
