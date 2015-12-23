@@ -13,8 +13,19 @@ module Application
     ) where
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
+#if defined(USE_SQLITE)
 import Database.Persist.Sqlite              (createSqlitePool, runSqlPool,
                                              sqlDatabase, sqlPoolSize)
+#elif defined(USE_MYSQL)
+import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
+                                             myPoolSize, runSqlPool)
+import qualified Database.MySQL.Base        as MySQL
+#elif defined(USE_POSTGRESQL)
+import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
+                                             pgPoolSize, runSqlPool)
+#else
+#error "unknown/unsupported database backend"
+#endif
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.Wai.Handler.Warp             (Settings, defaultSettings,
@@ -27,6 +38,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
+import System.Environment                   (lookupEnv)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -64,10 +76,55 @@ makeFoundation appSettings = do
         tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
         logFunc = messageLoggerSource tempFoundation appLogger
 
+    m_intended_db_type <- lookupEnv "INTENDED_DB_TYPE"
+    flip runLoggingT logFunc $ do
+        let compiled_ty =
+#if defined(USE_SQLITE)
+                            "sqlite"
+#elif defined(USE_MYSQL)
+                            "mysql"
+#elif defined(USE_POSTGRESQL)
+                            "postgresql"
+#else
+#error "unknown/unsupported database backend"
+#endif
+        case m_intended_db_type of
+            Just ty | not (null ty) -> do
+                unless ( ty == compiled_ty ) $ do
+                    $logError $ fromString $
+                                "DB types mismatch: "
+                                <> "expected DB type is " <> ty
+                                <> ", but compiled DB type is " <> compiled_ty
+
+                    throwM $ userError "DB types mismatch"
+
+            _ -> do
+                $logWarn $ "INTENDED_DB_TYPE not set, please set it to one of postgresql, mysql, sqlite"
+                $logWarn $ "Using DB backend: " <> compiled_ty
+
+#if defined(USE_MYSQL)
+    -- see https://ro-che.info/articles/2015-04-17-safe-concurrent-mysql-haskell
+    MySQL.initLibrary
+    MySQL.initThread
+#endif
+
     -- Create the database connection pool
+#if defined(USE_SQLITE)
     pool <- flip runLoggingT logFunc $ createSqlitePool
         (sqlDatabase $ appDatabaseConf appSettings)
         (sqlPoolSize $ appDatabaseConf appSettings)
+#elif defined(USE_MYSQL)
+    pool <- flip runLoggingT logFunc $ createMySQLPool
+        (myConnInfo $ appDatabaseConf appSettings)
+        (myPoolSize $ appDatabaseConf appSettings)
+#elif defined(USE_POSTGRESQL)
+    pool <- flip runLoggingT logFunc $ createPostgresqlPool
+        (pgConnStr  $ appDatabaseConf appSettings)
+        (pgPoolSize $ appDatabaseConf appSettings)
+#else
+#error "unknown/unsupported database backend"
+#endif
+
 
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc

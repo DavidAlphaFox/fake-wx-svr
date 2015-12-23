@@ -17,9 +17,29 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 # mutable-static: false
 # skip-combining: false
 
-database:
+# ignored, if not using MySQL
+mysql:
+  user:     "_env:MYSQL_USER:wxpp"
+  password: "_env:MYSQL_PASSWORD:"
+  host:     "_env:MYSQL_HOST:localhost"
+  port:     "_env:MYSQL_PORT:3306"
+  database: "_env:MYSQL_DATABASE:wxpp"
+  poolsize: "_env:MYSQL_POOLSIZE:10"
+
+# ignored, if not using Sqlite
+sqlite:
   database: "_env:SQLITE_DATABASE:fc-web-game-server.sqlite3"
   poolsize: "_env:SQLITE_POOLSIZE:10"
+
+# ignored, if not using PostgreSQL
+postgresql:
+  user:     "_env:PGUSER:pg-yesod"
+  password: "_env:PGPASS:pg-yesod"
+  host:     "_env:PGHOST:localhost"
+  port:     "_env:PGPORT:5432"
+  database: "_env:PGDATABASE:pg-yesod"
+  poolsize: "_env:PGPOOLSIZE:10"
+
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

@@ -11,12 +11,26 @@ import Data.Aeson                  (Result (..), fromJSON, withObject, (.!=),
                                     (.:?))
 import Data.FileEmbed              (embedFile)
 import Data.Yaml                   (decodeEither')
-import Database.Persist.Sqlite     (SqliteConf)
 import Language.Haskell.TH.Syntax  (Exp, Name, Q)
 import Network.Wai.Handler.Warp    (HostPreference)
 import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
+
+#if defined(USE_POSTGRESQL)
+import Database.Persist.Postgresql (PostgresConf)
+-- | Which Persistent backend this site is using.
+type PersistConf = PostgresConf
+#elif defined(USE_MYSQL)
+import Database.Persist.MySQL (MySQLConf)
+-- | Which Persistent backend this site is using.
+type PersistConf = MySQLConf
+#elif defined(USE_SQLITE)
+import Database.Persist.Sqlite (SqliteConf)
+type PersistConf = SqliteConf
+#else
+#error "unsupported DB backend?"
+#endif
 
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
@@ -24,7 +38,7 @@ import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
 data AppSettings = AppSettings
     { appStaticDir              :: String
     -- ^ Directory from which to serve static files.
-    , appDatabaseConf           :: SqliteConf
+    , appDatabaseConf           :: PersistConf
     -- ^ Configuration settings for accessing the database.
     , appRoot                   :: Text
     -- ^ Base for all generated URLs.
@@ -63,7 +77,15 @@ instance FromJSON AppSettings where
                 False
 #endif
         appStaticDir              <- o .: "static-dir"
-        appDatabaseConf           <- o .: "database"
+#if defined(USE_SQLITE)
+        appDatabaseConf           <- o .: "sqlite"
+#elif defined(USE_MYSQL)
+        appDatabaseConf           <- o .: "mysql"
+#elif defined(USE_POSTGRESQL)
+        appDatabaseConf           <- o .: "postgresql"
+#else
+#error "unknown/unsupported database backend"
+#endif
         appRoot                   <- o .: "approot"
         appHost                   <- fromString <$> o .: "host"
         appPort                   <- o .: "port"
