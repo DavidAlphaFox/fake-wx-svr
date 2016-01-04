@@ -39,6 +39,10 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 import System.Environment                   (lookupEnv)
+import Yesod.Core.Types                     (loggerDate)
+
+import Yesod.Helpers.Logger
+
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -60,6 +64,7 @@ makeFoundation appSettings = do
     -- subsite.
     appHttpManager <- newManager
     appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
+    appLogHandlerV <- newLogHandlerV (loggerDate appLogger) (appLoggerConfig appSettings)
     appStatic <-
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
@@ -136,6 +141,13 @@ makeFoundation appSettings = do
 -- applying some additional middlewares.
 makeApplication :: App -> IO Application
 makeApplication foundation = do
+    let def_logger = appLogger foundation
+#if DEVELOPMENT
+    let logger = def_logger
+#else
+    logger <- liftM (fromMaybe def_logger) $
+                    chooseYesodLoggerBySrcLV (appLogHandlerV foundation) "http"
+#endif
     logWare <- mkRequestLogger def
         { outputFormat =
             if appDetailedRequestLogging $ appSettings foundation
@@ -144,7 +156,7 @@ makeApplication foundation = do
                         (if appIpFromHeader $ appSettings foundation
                             then FromFallback
                             else FromSocket)
-        , destination = Logger $ loggerSet $ appLogger foundation
+        , destination = Logger $ loggerSet logger
         }
 
     -- Create the WAI application and apply middlewares

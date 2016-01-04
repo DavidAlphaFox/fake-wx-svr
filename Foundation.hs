@@ -10,6 +10,8 @@ import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 
+import Yesod.Helpers.Logger
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -20,6 +22,7 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
+    , appLogHandlerV :: LogHandlerV
     }
 
 instance HasHttpManager App where
@@ -98,14 +101,16 @@ instance Yesod App where
         -- Generate a unique filename based on the content itself
         genFileName lbs = "autogen-" ++ base64md5 lbs
 
-    -- What messages should be logged. The following includes all messages when
-    -- in development, and warnings and errors in production.
-    shouldLog app _source level =
-        appShouldLogAll (appSettings app)
-            || level == LevelWarn
-            || level == LevelError
+    shouldLogIO foundation source level = do
+        defaultShouldLogLV (appLogHandlerV foundation) source level
 
-    makeLogger = return . appLogger
+    makeLogger foundation =
+        -- return . appLogger
+        return $ fromMaybe def_logger $
+                defaultYesodLoggerHandlerV (appLogHandlerV foundation)
+        where
+            def_logger = appLogger foundation
+
 
 -- How to run database actions.
 instance YesodPersist App where

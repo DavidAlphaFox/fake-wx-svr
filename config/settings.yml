@@ -40,6 +40,61 @@ postgresql:
   database: "_env:PGDATABASE:pg-yesod"
   poolsize: "_env:PGPOOLSIZE:10"
 
+logger:
+  base-path: "_env:LOG_FILE_DIR:logs"
+  # 默认的日志有两个作用
+  # 没有其它日志处理某个写日志的请求时，使用这段配置处理，
+  # 如果它也不处理，则日志会被丢弃。
+  # Yesod 的 Hander 类型的函数（可能还有其它情况）内部使用的写日志函数
+  # 用的是同一个固定的 LoggerSet ，后者就是用这段配置产生的。
+  default:
+      type        : stderr
+
+      src-level:
+        "*" : debug
+
+  others:
+    -
+      # catch all sources
+      type  : stderr
+
+      src-level:
+        "*" : warn
+
+    -
+      type        : file
+      path        : default.log
+      cut-at-size : 100m
+
+      src-level:
+        "*" : warn
+
+    -
+      type        : file
+      path        : http.log
+      cut-at-size : 100m
+
+      src-level:
+        # http 来源现在只有非 Development 的时候才写到这里
+        # Development 的时候，直接去标准输出了
+        # 这个逻辑见 makeApplication 函数实现
+        http : debug
+
+    -
+      type        : file
+      path        : yesod.log
+      cut-at-size : 100m
+
+      src-level:
+        yesod : debug
+
+    -
+      type        : file
+      path        : sql.log
+      cut-at-size : 100m
+
+      src-level:
+        SQL : debug
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

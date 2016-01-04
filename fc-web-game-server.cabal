@@ -95,6 +95,7 @@ library
                  , containers
                  , vector
                  , time
+                 , yesod-helpers
 
     if flag(use-postgresql)
         build-depends: persistent-postgresql         >= 2.1.1      && < 2.3

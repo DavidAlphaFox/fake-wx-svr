@@ -17,6 +17,8 @@ import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
 
+import Yesod.Helpers.Logger
+
 #if defined(USE_POSTGRESQL)
 import Database.Persist.Postgresql (PostgresConf)
 -- | Which Persistent backend this site is using.
@@ -66,6 +68,7 @@ data AppSettings = AppSettings
     -- ^ Copyright text to appear in the footer of the page
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
+    , appLoggerConfig             :: LoggerConfig
     }
 
 instance FromJSON AppSettings where
@@ -99,6 +102,8 @@ instance FromJSON AppSettings where
 
         appCopyright              <- o .: "copyright"
         appAnalytics              <- o .:? "analytics"
+
+        appLoggerConfig <- o .:? "logger" .!= def
 
         return AppSettings {..}
 
