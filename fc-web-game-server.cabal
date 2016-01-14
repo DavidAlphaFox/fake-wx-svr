@@ -29,7 +29,7 @@ library
     hs-source-dirs: ., app
     exposed-modules: Application
                      Foundation
-                     Import
+    other-modules:   Import
                      Import.NoFoundation
                      Model
                      Settings
