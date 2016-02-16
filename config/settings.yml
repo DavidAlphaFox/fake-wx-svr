@@ -28,7 +28,7 @@ mysql:
 
 # ignored, if not using Sqlite
 sqlite:
-  database: "_env:SQLITE_DATABASE:fc-web-game-server.sqlite3"
+  database: "_env:SQLITE_DATABASE:fake-wx-svr.sqlite3"
   poolsize: "_env:SQLITE_POOLSIZE:10"
 
 # ignored, if not using PostgreSQL
