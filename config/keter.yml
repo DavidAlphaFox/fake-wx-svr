@@ -12,7 +12,7 @@ stanzas:
 
     # Name of your executable. You are unlikely to need to change this.
     # Note that all file paths are relative to the keter.yml file.
-    exec: ../dist/build/fc-web-game-server/fc-web-game-server
+    exec: ../dist/build/fake-wx-svr/fake-wx-svr
 
     # Command line options passed to your application.
     args: []
@@ -21,30 +21,30 @@ stanzas:
       # You can specify one or more hostnames for your application to respond
       # to. The primary hostname will be used for generating your application
       # root.
-      - www.fc-web-game-server.com
+      - api.weixin.qq.com
 
     # Enable to force Keter to redirect to https
     # Can be added to any stanza
     requires-secure: false
 
   # Static files.
-  - type: static-files
-    hosts:
-      - static.fc-web-game-server.com
-    root: ../static
+  #- type: static-files
+  #  hosts:
+  #    - static.fc-web-game-server.com
+  #  root: ../static
 
-    # Uncomment to turn on directory listings.
-    # directory-listing: true
+  #  # Uncomment to turn on directory listings.
+  #  # directory-listing: true
 
-  # Redirect plain domain name to www.
-  - type: redirect
+  ## Redirect plain domain name to www.
+  #- type: redirect
 
-    hosts:
-      - fc-web-game-server.com
-    actions:
-      - host: www.fc-web-game-server.com
-        # secure: false
-        # port: 80
+  #  hosts:
+  #    - fc-web-game-server.com
+  #  actions:
+  #    - host: www.fc-web-game-server.com
+  #      # secure: false
+  #      # port: 80
 
     # Uncomment to switch to a non-permanent redirect.
     # status: 303
