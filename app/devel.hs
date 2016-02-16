@@ -1,5 +1,5 @@
 {-# LANGUAGE PackageImports #-}
-import "fc-web-game-server" Application (develMain)
+import "fake-wx-svr" Application (develMain)
 import Prelude (IO)
 
 main :: IO ()

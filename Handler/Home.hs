@@ -12,5 +12,5 @@ import Import
 getHomeR :: Handler Html
 getHomeR = do
     defaultLayout $ do
-        setTitle "卡哚游戏"
+        setTitle "微信模拟接口服务"
         $(widgetFile "homepage")
