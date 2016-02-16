@@ -36,6 +36,8 @@ library
                      Settings.StaticFiles
                      Handler.Common
                      Handler.Home
+                     Handler.Admin.MP
+                     Handler.Simulate.MP
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -95,6 +97,7 @@ library
                  , vector
                  , time
                  , yesod-helpers
+                 , weixin-mp-sdk
 
     if flag(use-postgresql)
         build-depends: persistent-postgresql         >= 2.1.1      && < 2.3

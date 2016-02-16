@@ -1,1 +1,21 @@
- -- By default this file is used in Model.hs (which is imported by Foundation.hs)
+-- By default this file is used in Model.hs (which is imported by Foundation.hs)
+
+MpApp
+    appId               WxppAppID
+    secret              WxppAppSecret
+    token               Token
+    aesKey              AesKey
+
+    deleted             Bool
+
+    createdTime         UTCTime
+
+    UniqueMpApp appId
+
+
+-- | 生成过的 Access Token
+MadeAccessToken
+    appId               WxppAppID
+    data                Text
+    createdTime         UTCTime
+    expiry              UTCTime

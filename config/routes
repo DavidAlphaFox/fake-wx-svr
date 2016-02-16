@@ -4,3 +4,10 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
+
+/admin/mp/app                   MpAppListR              GET
+/admin/mp/app/new               MpAppNewR               GET POST
+/admin/mp/app/edit/#MpAppId     MpAppEditR              GET POST
+
+/cgi-bin/token                  SimulateTokenR          GET
+/cgi-bin/menu/create            SimulateMenuCreateR     POST

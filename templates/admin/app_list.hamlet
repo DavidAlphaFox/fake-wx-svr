@@ -1,0 +1,19 @@
+<table>
+    <tr>
+        <th>App Id
+        <th>App Secret
+        <th>Token
+        <th>Created Time
+        <th>Operations
+    $forall Entity rec_id rec <- app_list
+        <tr>
+            <td>#{mpAppAppId rec}
+            <td>#{mpAppSecret rec}
+            <td>#{mpAppToken rec}
+            <td>#{show $ mpAppCreatedTime rec}
+            <td>
+                <p>
+                    <a href="@{MpAppEditR rec_id}">编辑
+
+<p>
+    <a href="@{MpAppNewR}">增加
